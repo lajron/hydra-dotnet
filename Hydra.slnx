@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Hydra.Kernel/Hydra.Kernel.csproj" />
+  <Project Path="Hydra.WebApi/Hydra.WebApi.csproj" />
+</Solution>
