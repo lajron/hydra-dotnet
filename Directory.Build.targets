@@ -1,0 +1,7 @@
+<Project>
+    <ItemGroup Condition="'$(MSBuildProjectName)' != 'Hydra.Analyzers' and '$(MSBuildProjectName)' != 'Hydra.Analyzers.Tests'">
+        <ProjectReference Include="$(MSBuildThisFileDirectory)Hydra.Analyzers/Hydra.Analyzers/Hydra.Analyzers.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false" />
+    </ItemGroup>
+</Project>

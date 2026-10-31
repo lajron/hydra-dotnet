@@ -1,5 +1,11 @@
 namespace Hydra.Kernel.Primitives;
 
+/// <summary>
+/// Represents the result of an operation, which can either be a success or a failure with an associated application error.
+/// </summary>
+/// <remarks>
+/// This class is immutable and provides factory methods for creating success or failure results.
+/// </remarks>
 public sealed class Result
 {
     private AppError? Error { get; }
@@ -26,6 +32,13 @@ public sealed class Result
     }
 }
 
+/// <summary>
+/// Represents the result of an operation that can either be a success with a value of type T or a failure with an associated application error.
+/// </summary>
+/// <typeparam name="T">The type of the value returned on success.</typeparam>
+/// <remarks>
+/// This class is immutable and provides factory methods for creating success or failure results.
+/// </remarks>
 public sealed class Result<T>
 {
     private T Value { get; }
