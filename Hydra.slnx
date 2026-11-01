@@ -2,6 +2,9 @@
   <Project Path="Hydra.Analyzers/Hydra.Analyzers.Sample/Hydra.Analyzers.Sample.csproj" />
   <Project Path="Hydra.Analyzers/Hydra.Analyzers.Tests/Hydra.Analyzers.Tests.csproj" />
   <Project Path="Hydra.Analyzers/Hydra.Analyzers/Hydra.Analyzers.csproj" />
+  <Project Path="Hydra.Application/Hydra.Application.csproj" />
+  <Project Path="Hydra.Integrations/Hydra.Integrations.csproj" />
+  <Project Path="Hydra.Kernel.Tests/Hydra.Kernel.Tests.csproj" />
   <Project Path="Hydra.Kernel/Hydra.Kernel.csproj" />
   <Project Path="Hydra.WebApi/Hydra.WebApi.csproj" />
 </Solution>
