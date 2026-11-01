@@ -8,4 +8,5 @@
   <Project Path="Hydra.Kernel.Tests/Hydra.Kernel.Tests.csproj" />
   <Project Path="Hydra.Kernel/Hydra.Kernel.csproj" />
   <Project Path="Hydra.WebApi/Hydra.WebApi.csproj" />
+  <Project Path="Hydra.WebApi.Tests/Hydra.WebApi.Tests.csproj" />
 </Solution>

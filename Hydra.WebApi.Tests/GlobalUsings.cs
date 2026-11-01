@@ -1,0 +1,17 @@
+global using System.Globalization;
+global using System.Net;
+global using System.Net.Http.Json;
+global using System.Text.Json;
+global using FluentValidation;
+global using Hydra.Kernel.Primitives;
+global using Hydra.Kernel.Validation;
+global using Hydra.WebApi.Configuration;
+global using Hydra.WebApi.Mappings.Response;
+global using Hydra.WebApi.Tests.Fixtures;
+global using Microsoft.AspNetCore.Builder;
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.AspNetCore.Http;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.Routing;
+global using Microsoft.Extensions.DependencyInjection;
+global using Xunit;

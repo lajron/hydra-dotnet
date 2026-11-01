@@ -3,6 +3,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddMediatorConfiguration();
+builder.Services.AddHydraLocalization();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
@@ -13,6 +15,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRequestLocalization();
+app.UseExceptionHandler();
 
 app.UseAuthorization();
 

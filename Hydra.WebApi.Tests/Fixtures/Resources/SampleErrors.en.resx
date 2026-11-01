@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="Missing" xml:space="preserve"><value>Guest with ID {0} and balance {1:N2} was not found.</value></data>
+  <data name="EnglishOnly" xml:space="preserve"><value>English fallback.</value></data>
+  <data name="Field" xml:space="preserve"><value>Field value {0} is invalid.</value></data>
+</root>

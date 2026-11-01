@@ -1,3 +1,13 @@
 global using Scalar.AspNetCore;
 global using Hydra.Kernel.Primitives;
+global using Hydra.Kernel.Validation;
 global using Hydra.WebApi.Configuration;
+global using Hydra.WebApi.Mappings.Response;
+global using System.Collections.Concurrent;
+global using System.Globalization;
+global using System.Resources;
+global using Microsoft.AspNetCore.Http;
+global using Microsoft.AspNetCore.Builder;
+global using Microsoft.AspNetCore.Localization;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.Extensions.DependencyInjection;
