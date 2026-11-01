@@ -1,3 +1,5 @@
+using FluentValidation;
+using Hydra.Kernel.Validation;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,7 +12,10 @@ public static class MediatorConfiguration
         services.AddMediator((MediatorOptions options) =>
         {
             options.ServiceLifetime = ServiceLifetime.Scoped;
+            options.PipelineBehaviors = [typeof(ValidationBehavior<,>)];
         });
+
+        services.AddValidatorsFromAssembly(Hydra.Application.AssemblyReference.Assembly, ServiceLifetime.Scoped);
 
         return services;
     }

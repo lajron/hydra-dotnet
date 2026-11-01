@@ -3,6 +3,7 @@
   <Project Path="Hydra.Analyzers/Hydra.Analyzers.Tests/Hydra.Analyzers.Tests.csproj" />
   <Project Path="Hydra.Analyzers/Hydra.Analyzers/Hydra.Analyzers.csproj" />
   <Project Path="Hydra.Application/Hydra.Application.csproj" />
+  <Project Path="Hydra.Application.Tests/Hydra.Application.Tests.csproj" />
   <Project Path="Hydra.Integrations/Hydra.Integrations.csproj" />
   <Project Path="Hydra.Kernel.Tests/Hydra.Kernel.Tests.csproj" />
   <Project Path="Hydra.Kernel/Hydra.Kernel.csproj" />
