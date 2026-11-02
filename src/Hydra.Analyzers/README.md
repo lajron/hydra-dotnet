@@ -9,8 +9,11 @@
 | RES001 | A Result outcome is ignored, overwritten, or lost. | Check the error, propagate the Result, or explicitly discard an already awaited Result with `_ =`. |
 | RES002 | A deconstructed value can be used while its Result might have failed. | Handle the matching error or assign a replacement first. |
 | RES003 | The Result state cannot be proven safe at this operation. | Propagate failure, recover, or simplify the flow. |
+| HYD001 | An expression-bodied member's expression spans several lines (a multi-line ternary or LINQ chain). | Use a block body, or keep the expression on one line. One expression that starts on the line after `=>` is accepted. |
 
-The diagnostics are errors in `.editorconfig`. `_ = result` and `_ = await operation()` intentionally discard a Result. `_ = operation()` is rejected when `operation()` returns `Task<Result>` or `ValueTask<Result>` because it drops the task before awaiting it. Ordinary tasks remain the compiler's [CS4014](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/async-await-errors) concern.
+HYD001 is a coding-standard rule, not a Result rule; it is reported as a warning in `.editorconfig`. See `docs/CODING_STANDARDS.md`.
+
+The RES diagnostics are errors in `.editorconfig`. `_ = result` and `_ = await operation()` intentionally discard a Result. `_ = operation()` is rejected when `operation()` returns `Task<Result>` or `ValueTask<Result>` because it drops the task before awaiting it. Ordinary tasks remain the compiler's [CS4014](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/async-await-errors) concern.
 
 ## Supported flow
 

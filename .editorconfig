@@ -1,6 +1,173 @@
 root = true
 
+# Tiers (see docs/CODING_STANDARDS.md):
+#   error      -> always fails `dotnet build`: Result safety (RES*), nullable, compiler correctness (CS9107/9113/9124)
+#   warning    -> every style rule. Printed by `dotnet build`; fails `dotnet build -warnaserror` (the strict gate).
+#                 Warnings, not errors, so existing code can be migrated incrementally and stays visible.
+#   suggestion -> editor hint only (Rider/VS); never reported by the command-line build
+#   none       -> deliberately off, reason given inline
+# Never loosen a severity here to make a build pass without asking.
+
+[*]
+indent_style = space
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{json,slnx,yml,yaml}]
+indent_size = 2
+
+[*.{csproj,props,targets}]
+indent_size = 4
+
+[*.md]
+trim_trailing_whitespace = false
+
 [*.cs]
+indent_size = 4
+charset = utf-8
+
+# ---------------------------------------------------------------------------
+# Result safety (Hydra.Analyzers)
+# ---------------------------------------------------------------------------
 dotnet_diagnostic.RES001.severity = error
 dotnet_diagnostic.RES002.severity = error
 dotnet_diagnostic.RES003.severity = error
+
+# ---------------------------------------------------------------------------
+# Style: ternaries, expression bodies, primary constructors
+# ---------------------------------------------------------------------------
+# No nested ?: operators (Roslynator). Everything else Roslynator ships is switched off by category.
+dotnet_analyzer_diagnostic.category-roslynator.severity = none
+dotnet_diagnostic.RCS1238.severity = warning
+
+# A multi-line expression body is not allowed (Hydra.Analyzers HYD001); one expression wrapped after `=>` is fine. No built-in rule can express this:
+# IDE0022 'when_on_single_line' accepts multi-line expression bodies, and 'false' bans every `=>` method
+# (17 existing forwarding/factory methods in AppError/Result), so the rule is HYD001 instead.
+dotnet_diagnostic.HYD001.severity = warning
+# Methods and local functions: no IDE0022/IDE0061 diagnostic. Short `=>` and short blocks are both fine.
+csharp_style_expression_bodied_methods = false:silent
+csharp_style_expression_bodied_local_functions = false:silent
+csharp_style_expression_bodied_constructors = false:warning
+csharp_style_expression_bodied_operators = when_on_single_line:suggestion
+csharp_style_expression_bodied_properties = when_on_single_line:suggestion
+csharp_style_expression_bodied_indexers = when_on_single_line:suggestion
+csharp_style_expression_bodied_accessors = when_on_single_line:suggestion
+csharp_style_expression_bodied_lambdas = when_on_single_line:suggestion
+
+# if/else must not be rewritten into ?: (IDE0045/IDE0046 push toward ternaries).
+dotnet_style_prefer_conditional_expression_over_assignment = false:silent
+dotnet_style_prefer_conditional_expression_over_return = false:silent
+dotnet_diagnostic.IDE0045.severity = none
+dotnet_diagnostic.IDE0046.severity = none
+
+# Primary constructors where a constructor only assigns (IDE0290). A constructor with guard statements is not reported.
+csharp_style_prefer_primary_constructors = true:warning
+dotnet_diagnostic.CS9113.severity = error
+dotnet_diagnostic.CS9107.severity = error
+dotnet_diagnostic.CS9124.severity = error
+
+# ---------------------------------------------------------------------------
+# Style: structure
+# ---------------------------------------------------------------------------
+csharp_prefer_braces = true:warning
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_using_directive_placement = outside_namespace:warning
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
+csharp_preferred_modifier_order = public,private,protected,internal,file,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,required,volatile,async:warning
+dotnet_style_readonly_field = true:warning
+
+# Unnecessary usings. Reported on build only because Directory.Build.props sets GenerateDocumentationFile.
+dotnet_diagnostic.IDE0005.severity = warning
+dotnet_diagnostic.IDE0036.severity = warning
+dotnet_diagnostic.IDE0040.severity = warning
+dotnet_diagnostic.IDE0044.severity = warning
+dotnet_diagnostic.IDE0161.severity = warning
+dotnet_diagnostic.IDE0065.severity = warning
+dotnet_diagnostic.IDE0011.severity = warning
+
+# Formatting (IDE0055) is reported by the build as well as by `dotnet format`.
+dotnet_diagnostic.IDE0055.severity = warning
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_indent_case_contents = true
+csharp_preserve_single_line_blocks = true
+
+# Blank lines are deliberately unconstrained: a check directly under the call it checks, as in
+# `var (value, error) = Get();` + `if (error is not null)`, is the Result idiom and must not warn.
+dotnet_diagnostic.IDE2000.severity = none
+dotnet_diagnostic.IDE2003.severity = none
+
+# Unused code
+dotnet_diagnostic.IDE0051.severity = warning
+dotnet_diagnostic.IDE0052.severity = warning
+dotnet_diagnostic.IDE0059.severity = warning
+dotnet_diagnostic.IDE0060.severity = warning
+
+# ---------------------------------------------------------------------------
+# Naming (IDE1006). Rules are matched top to bottom; the first match wins.
+# IDE1006 is only reported on build when its diagnostic severity is set explicitly.
+# The `Async` suffix is intentionally not enforced: it misfires on Mediator handlers, endpoints and test methods.
+# ---------------------------------------------------------------------------
+dotnet_diagnostic.IDE1006.severity = warning
+
+dotnet_naming_symbols.static_or_const_fields.applicable_kinds = field
+dotnet_naming_symbols.static_or_const_fields.applicable_accessibilities = *
+dotnet_naming_symbols.static_or_const_fields.required_modifiers = static
+dotnet_naming_symbols.const_fields.applicable_kinds = field
+dotnet_naming_symbols.const_fields.applicable_accessibilities = *
+dotnet_naming_symbols.const_fields.required_modifiers = const
+dotnet_naming_symbols.private_instance_fields.applicable_kinds = field
+dotnet_naming_symbols.private_instance_fields.applicable_accessibilities = private
+dotnet_naming_symbols.interfaces.applicable_kinds = interface
+dotnet_naming_symbols.interfaces.applicable_accessibilities = *
+dotnet_naming_symbols.types.applicable_kinds = class,struct,enum,delegate
+dotnet_naming_symbols.types.applicable_accessibilities = *
+
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+dotnet_naming_style.underscore_camel_case.capitalization = camel_case
+dotnet_naming_style.underscore_camel_case.required_prefix = _
+dotnet_naming_style.i_pascal_case.capitalization = pascal_case
+dotnet_naming_style.i_pascal_case.required_prefix = I
+
+dotnet_naming_rule.static_fields_pascal.symbols = static_or_const_fields
+dotnet_naming_rule.static_fields_pascal.style = pascal_case
+dotnet_naming_rule.static_fields_pascal.severity = warning
+dotnet_naming_rule.const_fields_pascal.symbols = const_fields
+dotnet_naming_rule.const_fields_pascal.style = pascal_case
+dotnet_naming_rule.const_fields_pascal.severity = warning
+dotnet_naming_rule.private_fields_underscore.symbols = private_instance_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel_case
+dotnet_naming_rule.private_fields_underscore.severity = warning
+dotnet_naming_rule.interfaces_i_prefix.symbols = interfaces
+dotnet_naming_rule.interfaces_i_prefix.style = i_pascal_case
+dotnet_naming_rule.interfaces_i_prefix.severity = warning
+dotnet_naming_rule.types_pascal.symbols = types
+dotnet_naming_rule.types_pascal.style = pascal_case
+dotnet_naming_rule.types_pascal.severity = warning
+
+# ---------------------------------------------------------------------------
+# Async, cancellation, analyzers kept at their defaults or turned off on purpose
+# ---------------------------------------------------------------------------
+dotnet_diagnostic.CA2016.severity = warning
+dotnet_diagnostic.CA1068.severity = warning
+# ASP.NET Core has no synchronization context; ConfigureAwait(false) would be noise.
+dotnet_diagnostic.CA2007.severity = none
+# Aggressive collection-expression / simplification rules: editor hints only.
+dotnet_diagnostic.IDE0028.severity = suggestion
+dotnet_diagnostic.IDE0300.severity = suggestion
+dotnet_diagnostic.IDE0301.severity = suggestion
+dotnet_diagnostic.IDE0305.severity = suggestion
+# Namespaces intentionally do not mirror every folder (e.g. Hydra.Kernel.Primitives holds Primitives/Outcomes).
+dotnet_diagnostic.IDE0130.severity = none
+
+# ---------------------------------------------------------------------------
+# Generated code
+# ---------------------------------------------------------------------------
+[*.{g,generated,Designer}.cs]
+generated_code = true
+dotnet_analyzer_diagnostic.severity = none

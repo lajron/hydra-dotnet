@@ -1,0 +1,17 @@
+<Project>
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <!-- Nullable warnings are correctness bugs: they fail the build. No blanket TreatWarningsAsErrors,
+             so NuGet audit (NU19xx) and other external warnings cannot break a build. -->
+        <WarningsAsErrors>$(WarningsAsErrors);nullable</WarningsAsErrors>
+
+        <!-- Report IDE (style) analyzers during `dotnet build`, not only in the editor. -->
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <!-- Pinned so analyzer behaviour does not drift with the installed SDK (never `latest`). -->
+        <AnalysisLevel>10.0</AnalysisLevel>
+        <!-- IDE0005 (unnecessary usings) is only reported on build when an XML doc file is generated.
+             CS1591 (missing XML comment) is not a Hydra rule. -->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+    </PropertyGroup>
+</Project>
