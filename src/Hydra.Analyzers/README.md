@@ -26,18 +26,18 @@ Field and property Result initializers are diagnosed because their outcomes can 
 
 ```bash
 dotnet build Hydra.slnx -m:1
-dotnet test --project Hydra.Analyzers/Hydra.Analyzers.Tests/Hydra.Analyzers.Tests.csproj --no-build
+dotnet test --project tests/Hydra.Analyzers.Tests/Hydra.Analyzers.Tests.csproj --no-build
 ```
 
-`global.json` selects Microsoft Testing Platform for xUnit v3 on .NET 10. The test executable can also run directly with `dotnet run --project Hydra.Analyzers/Hydra.Analyzers.Tests/Hydra.Analyzers.Tests.csproj`.
+`global.json` selects Microsoft Testing Platform for xUnit v3 on .NET 10. The test executable can also run directly with `dotnet run --project tests/Hydra.Analyzers.Tests/Hydra.Analyzers.Tests.csproj`.
 
 The test project retains `Microsoft.NET.Test.Sdk` because Rider 2025.3 has a known Microsoft Testing Platform v2 discovery issue without it; JetBrains documents that package as a workaround. Rider may also require **Settings → Build, Execution, Deployment → Unit Testing → Testing Platform → Enable Testing Platform support**.
 
 The sample builds normally. To trigger intentional build errors:
 
 ```bash
-dotnet build Hydra.Analyzers/Hydra.Analyzers.Sample/Hydra.Analyzers.Sample.csproj -p:DefineConstants=HYDRA_DIAGNOSTIC_DEMO
-dotnet build Hydra.Kernel/Hydra.Kernel.csproj -p:DefineConstants=HYDRA_DIAGNOSTIC_DEMO
+dotnet build samples/Hydra.Analyzers.Sample/Hydra.Analyzers.Sample.csproj -p:DefineConstants=HYDRA_DIAGNOSTIC_DEMO
+dotnet build src/Hydra.Kernel/Hydra.Kernel.csproj -p:DefineConstants=HYDRA_DIAGNOSTIC_DEMO
 ```
 
 In Rider, enable `HYDRA_DIAGNOSTIC_DEMO` in the Sample or Kernel project to inspect the diagnostics in `Examples.cs` or `RSA_ResultTest.cs`. Both files are inactive in normal builds. The command-line build has been verified; Rider's editor display needs a manual check in Rider.

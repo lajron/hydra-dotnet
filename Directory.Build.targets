@@ -1,6 +1,6 @@
 <Project>
     <ItemGroup Condition="'$(MSBuildProjectName)' != 'Hydra.Analyzers' and '$(MSBuildProjectName)' != 'Hydra.Analyzers.Tests' and '$(MSBuildProjectName)' != 'Hydra.Kernel.Tests'">
-        <ProjectReference Include="$(MSBuildThisFileDirectory)Hydra.Analyzers/Hydra.Analyzers/Hydra.Analyzers.csproj"
+        <ProjectReference Include="$(MSBuildThisFileDirectory)src/Hydra.Analyzers/Hydra.Analyzers.csproj"
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false" />
     </ItemGroup>

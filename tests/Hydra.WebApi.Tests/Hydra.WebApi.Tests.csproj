@@ -12,6 +12,6 @@
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
     <PackageReference Include="FluentValidation" />
-    <ProjectReference Include="..\Hydra.WebApi\Hydra.WebApi.csproj" />
+    <ProjectReference Include="..\..\src\Hydra.WebApi\Hydra.WebApi.csproj" />
   </ItemGroup>
 </Project>

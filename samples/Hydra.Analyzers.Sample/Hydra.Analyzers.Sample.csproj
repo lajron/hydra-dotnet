@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Hydra.Kernel\Hydra.Kernel.csproj" />
+        <ProjectReference Include="..\..\src\Hydra.Kernel\Hydra.Kernel.csproj" />
     </ItemGroup>
 
 </Project>

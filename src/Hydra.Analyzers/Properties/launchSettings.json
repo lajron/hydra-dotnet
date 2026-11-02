@@ -3,7 +3,7 @@
   "profiles": {
     "DebugRoslynAnalyzers": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "../Hydra.Analyzers.Sample/Hydra.Analyzers.Sample.csproj"
+      "targetProject": "../../../samples/Hydra.Analyzers.Sample/Hydra.Analyzers.Sample.csproj"
     }
   }
 }
