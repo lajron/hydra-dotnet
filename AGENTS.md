@@ -4,7 +4,7 @@
 the code. Reference: `docs/CODING_STANDARDS.md`.
 
 Before finishing, run `dotnet build Hydra.slnx --no-incremental` and `dotnet test --solution Hydra.slnx`.
-Your change must not add a warning or error. Existing warnings are a known backlog; leave unrelated files alone.
+The solution builds with zero warnings; your change must keep it that way (`-warnaserror` is the gate).
 
 - Never suppress a diagnostic or change a severity in `.editorconfig` to get green without asking.
 - Never commit, stash or reset unless asked. Never add AI attribution to commits, PRs or code.

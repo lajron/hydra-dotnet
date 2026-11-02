@@ -11,8 +11,8 @@ Enforced by the build. Severities are in `.editorconfig`; MSBuild switches in `D
 | warning | prints; fails with `-warnaserror` | every style rule below |
 | suggestion | editor only | optional sugar (collection expressions, property/accessor `=>`) |
 
-Style rules are warnings so existing code can be migrated incrementally and nothing is hidden by an exemption.
-There is no blanket `TreatWarningsAsErrors`, so NuGet audit warnings cannot break a build.
+The repo builds with zero warnings. Style rules are warnings rather than errors so a half-finished edit does not block a local build;
+`-warnaserror` is the gate. There is no blanket `TreatWarningsAsErrors`, so NuGet audit warnings cannot break a build.
 
 ## Rules (all warning unless noted)
 
@@ -37,12 +37,12 @@ IDE2000/2003 (blank lines are unconstrained, so `var (v, error) = Get();` direct
 
 ```bash
 dotnet build Hydra.slnx --no-incremental
-dotnet build Hydra.slnx --no-incremental -warnaserror     # strict gate; fails until the backlog is cleared
+dotnet build Hydra.slnx --no-incremental -warnaserror     # strict gate
 dotnet test --solution Hydra.slnx
 dotnet format whitespace Hydra.slnx --verify-no-changes --no-restore
 ```
 
-Fix a backlog rule with a scoped run and review the diff:
+Auto-fix a rule with a scoped run and review the diff:
 `dotnet format style Hydra.slnx --no-restore --diagnostics IDE0011 --include <file>`.
 
 ## Limits
