@@ -3,7 +3,6 @@ using Hydra.Kernel.Primitives;
 using Hydra.Kernel.Validation;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace Hydra.Application.Tests;
 
@@ -193,15 +192,18 @@ public sealed class NonResultRequestValidator : AbstractValidator<NonResultReque
 
 public sealed class ValidationIntegrationTests
 {
-    private static ServiceProvider CreateProvider() => new ServiceCollection()
-        .AddScoped<ExecutionState>()
-        .AddValidatorsFromAssemblyContaining<NameValidator>(ServiceLifetime.Scoped)
-        .AddMediator((MediatorOptions options) =>
-        {
-            options.ServiceLifetime = ServiceLifetime.Scoped;
-            options.PipelineBehaviors = [typeof(ValidationBehavior<,>)];
-        })
-        .BuildServiceProvider(validateScopes: true);
+    private static ServiceProvider CreateProvider()
+    {
+        return new ServiceCollection()
+            .AddScoped<ExecutionState>()
+            .AddValidatorsFromAssemblyContaining<NameValidator>(ServiceLifetime.Scoped)
+            .AddMediator((MediatorOptions options) =>
+            {
+                options.ServiceLifetime = ServiceLifetime.Scoped;
+                options.PipelineBehaviors = [typeof(ValidationBehavior<,>)];
+            })
+            .BuildServiceProvider(validateScopes: true);
+    }
 
     [Fact]
     public async Task Request_without_validators_executes_handler()

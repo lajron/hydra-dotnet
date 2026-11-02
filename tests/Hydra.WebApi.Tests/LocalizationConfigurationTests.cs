@@ -12,7 +12,7 @@ public sealed class LocalizationConfigurationTests
         var services = new ServiceCollection();
         services.AddLogging();
 
-        Assert.Same(services, services.AddLocalizationConfiguration());
+        Assert.Same(services, services.AddLocalizationServices());
 
         using var provider = services.BuildServiceProvider();
         Assert.NotNull(provider.GetService<IStringLocalizerFactory>());

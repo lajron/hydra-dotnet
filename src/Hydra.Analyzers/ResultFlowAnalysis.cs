@@ -1,10 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
 namespace Hydra.Analyzers;
@@ -48,8 +44,16 @@ internal sealed class ResultFlowAnalysis
         internal State Copy()
         {
             var copy = new State { Break = Break };
-            foreach (var entry in Pairs) copy.Pairs.Add(entry.Key, entry.Value);
-            foreach (var entry in Pending) copy.Pending.Add(entry.Key, entry.Value);
+            foreach (var entry in Pairs)
+            {
+                copy.Pairs.Add(entry.Key, entry.Value);
+            }
+
+            foreach (var entry in Pending)
+            {
+                copy.Pending.Add(entry.Key, entry.Value);
+            }
+
             return copy;
         }
     }
@@ -67,16 +71,24 @@ internal sealed class ResultFlowAnalysis
     {
         var exits = RunStatements(body.Statements, new List<State> { new() });
         foreach (var state in exits)
+        {
             ReportUnfinished(state, body.CloseBraceToken.GetLocation());
+        }
     }
 
     internal void Analyze(IEnumerable<StatementSyntax> statements)
     {
         var list = statements.ToArray();
-        if (list.Length == 0) return;
+        if (list.Length == 0)
+        {
+            return;
+        }
+
         var exits = RunStatements(list, new List<State> { new() });
         foreach (var state in exits)
+        {
             ReportUnfinished(state, list[list.Length - 1].GetLocation());
+        }
     }
 
     private List<State> RunStatements(IEnumerable<StatementSyntax> statements, List<State> incoming)
@@ -84,7 +96,11 @@ internal sealed class ResultFlowAnalysis
         var current = incoming;
         foreach (var statement in statements)
         {
-            if (current.Count == 0) break;
+            if (current.Count == 0)
+            {
+                break;
+            }
+
             var next = new List<State>();
             foreach (var state in current)
             {
@@ -110,7 +126,11 @@ internal sealed class ResultFlowAnalysis
             case LocalDeclarationStatementSyntax declaration:
                 foreach (var variable in declaration.Declaration.Variables)
                 {
-                    if (variable.Initializer is null) continue;
+                    if (variable.Initializer is null)
+                    {
+                        continue;
+                    }
+
                     Read(variable.Initializer.Value, state);
                     var symbol = _model.GetDeclaredSymbol(variable);
                     var source = OutcomeSource(variable.Initializer.Value);
@@ -122,12 +142,18 @@ internal sealed class ResultFlowAnalysis
                             state.Pending[symbol] = variable.GetLocation();
                         }
                         else
+                        {
                             state.Pending[symbol] = obligation;
+                        }
+
                         continue;
                     }
                     if (IsResultOrTask(_model.GetTypeInfo(variable.Initializer.Value).Type))
                     {
-                        if (symbol is not null) state.Pending[symbol] = variable.GetLocation();
+                        if (symbol is not null)
+                        {
+                            state.Pending[symbol] = variable.GetLocation();
+                        }
                     }
                 }
                 return One(state);
@@ -141,7 +167,11 @@ internal sealed class ResultFlowAnalysis
                 RunReturn(returned.Expression, state, returned);
                 return new List<State>();
             case ThrowStatementSyntax thrown:
-                if (thrown.Expression is not null) Read(thrown.Expression, state);
+                if (thrown.Expression is not null)
+                {
+                    Read(thrown.Expression, state);
+                }
+
                 ReportUnobservedAtThrow(state);
                 return new List<State>();
             case BreakStatementSyntax:
@@ -155,7 +185,9 @@ internal sealed class ResultFlowAnalysis
             default:
                 Read(statement, state);
                 if (ContainsResultWork(statement) || state.Pairs.Values.Any(x => x is Outcome.Unknown or Outcome.Failure))
+                {
                     Report(ResultSafetyAnalyzer.UnsafeFlow, statement.GetLocation());
+                }
                 // This statement's control flow is outside the supported language subset.
                 // Its Result operations have a diagnostic; never infer success from it.
                 return One(state);
@@ -167,8 +199,16 @@ internal sealed class ResultFlowAnalysis
         if (expression is ConditionalExpressionSyntax conditional)
         {
             var (yes, no) = Condition(conditional.Condition, state);
-            foreach (var path in yes) RunReturn(conditional.WhenTrue, path, returned);
-            foreach (var path in no) RunReturn(conditional.WhenFalse, path, returned);
+            foreach (var path in yes)
+            {
+                RunReturn(conditional.WhenTrue, path, returned);
+            }
+
+            foreach (var path in no)
+            {
+                RunReturn(conditional.WhenFalse, path, returned);
+            }
+
             return;
         }
         if (expression is ThrowExpressionSyntax thrown)
@@ -184,17 +224,29 @@ internal sealed class ResultFlowAnalysis
             var hasNullArm = switched.Arms.Any(arm => IsNullPattern(arm.Pattern));
             var hasDiscard = switched.Arms.Any(arm => arm.Pattern is DiscardPatternSyntax);
             if (!hasDiscard)
+            {
                 Report(ResultSafetyAnalyzer.UnsafeFlow, switched.GetLocation());
+            }
+
             foreach (var arm in switched.Arms)
             {
                 var path = state.Copy();
                 if (pair is not null)
                 {
-                    if (IsNullPattern(arm.Pattern)) path.Pairs[pair] = Outcome.Success;
+                    if (IsNullPattern(arm.Pattern))
+                    {
+                        path.Pairs[pair] = Outcome.Success;
+                    }
                     else if (arm.Pattern is not DiscardPatternSyntax || hasNullArm)
+                    {
                         path.Pairs[pair] = Outcome.Failure;
+                    }
                 }
-                if (arm.WhenClause is not null) Read(arm.WhenClause.Condition, path);
+                if (arm.WhenClause is not null)
+                {
+                    Read(arm.WhenClause.Condition, path);
+                }
+
                 RunReturn(arm.Expression, path, returned);
             }
             return;
@@ -203,7 +255,10 @@ internal sealed class ResultFlowAnalysis
         {
             Read(expression, state);
             var returnedSymbol = OutcomeSource(expression);
-            if (returnedSymbol is not null) ClearPending(state, returnedSymbol);
+            if (returnedSymbol is not null)
+            {
+                ClearPending(state, returnedSymbol);
+            }
         }
         CheckReturn(state, returned, expression);
     }
@@ -223,16 +278,26 @@ internal sealed class ResultFlowAnalysis
         {
             Read(assign.Right, state);
             if (assign.Left is not IdentifierNameSyntax)
+            {
                 Read(assign.Left, state);
+            }
+
             var target = Symbol(assign.Left);
             if (assign.Left is IdentifierNameSyntax id && id.Identifier.ValueText == "_" &&
                 _model.GetOperation(assign.Left) is IDiscardOperation)
             {
                 if (IsResultOrTask(_model.GetTypeInfo(assign.Right).Type) &&
                     !IsResult(_model.GetTypeInfo(assign.Right).Type))
+                {
                     Report(ResultSafetyAnalyzer.IgnoredResult, assign.GetLocation());
+                }
+
                 var discarded = OutcomeSource(assign.Right);
-                if (discarded is not null) ClearPending(state, discarded);
+                if (discarded is not null)
+                {
+                    ClearPending(state, discarded);
+                }
+
                 return One(state);
             }
 
@@ -240,29 +305,46 @@ internal sealed class ResultFlowAnalysis
             {
                 var source = OutcomeSource(assign.Right);
                 Location? sourceObligation = null;
-                if (source is not null) state.Pending.TryGetValue(source, out sourceObligation);
+                if (source is not null)
+                {
+                    state.Pending.TryGetValue(source, out sourceObligation);
+                }
+
                 if (state.Pending.TryGetValue(target, out var old))
                 {
                     state.Pending.Remove(target);
                     if (!ReferenceEquals(sourceObligation, old) &&
                         !state.Pending.Values.Any(location => ReferenceEquals(location, old)))
+                    {
                         Report(ResultSafetyAnalyzer.IgnoredResult, old);
+                    }
                 }
                 if (sourceObligation is not null)
+                {
                     state.Pending[target] = sourceObligation;
+                }
                 else if (IsResultOrTask(_model.GetTypeInfo(assign.Right).Type))
+                {
                     state.Pending[target] = assign.GetLocation();
+                }
 
                 foreach (var pair in state.Pairs.Keys.ToArray())
                 {
                     if (SymbolEqualityComparer.Default.Equals(pair.Error, target))
+                    {
                         Report(ResultSafetyAnalyzer.UnsafeFlow, assign.Left.GetLocation());
+                    }
+
                     if (pair.Value is not null && SymbolEqualityComparer.Default.Equals(pair.Value, target))
                     {
                         if (IsInvalidFallback(pair, assign.Right))
+                        {
                             Report(ResultSafetyAnalyzer.UnsafeFlow, assign.Right.GetLocation());
+                        }
                         else if (state.Pairs[pair] == Outcome.Failure)
+                        {
                             state.Pairs[pair] = Outcome.Recovered;
+                        }
                     }
                 }
             }
@@ -271,10 +353,16 @@ internal sealed class ResultFlowAnalysis
 
         Read(expression, state);
         if (IsResultOrTask(_model.GetTypeInfo(expression).Type))
+        {
             Report(ResultSafetyAnalyzer.IgnoredResult, expression.GetLocation());
+        }
+
         var awaitedSource = OutcomeSource(expression);
         if (expression is AwaitExpressionSyntax && awaitedSource is not null)
+        {
             ClearPending(state, awaitedSource);
+        }
+
         return One(state);
     }
 
@@ -284,12 +372,18 @@ internal sealed class ResultFlowAnalysis
         foreach (var node in assignment.Left.DescendantNodesAndSelf())
         {
             if (node is SingleVariableDesignationSyntax designation)
+            {
                 slots.Add(_model.GetDeclaredSymbol(designation));
+            }
             else if (node is DiscardDesignationSyntax)
+            {
                 slots.Add(null);
+            }
             else if (node is IdentifierNameSyntax identifier &&
                      !identifier.Ancestors().Any(a => a is DeclarationExpressionSyntax))
+            {
                 slots.Add(Symbol(identifier));
+            }
         }
         if (slots.Count != 2 || slots[1] is null)
         {
@@ -305,13 +399,20 @@ internal sealed class ResultFlowAnalysis
                  SymbolEqualityComparer.Default.Equals(slot, old.Error))))
             {
                 if (state.Pairs[old] is Outcome.Unknown or Outcome.Failure)
+                {
                     Report(ResultSafetyAnalyzer.IgnoredResult, old.Location);
+                }
+
                 state.Pairs.Remove(old);
             }
         }
 
         var source = OutcomeSource(assignment.Right);
-        if (source is not null) ClearPending(state, source);
+        if (source is not null)
+        {
+            ClearPending(state, source);
+        }
+
         var deconstruction = (IDeconstructionAssignmentOperation)_model.GetOperation(assignment)!;
         var successType = (deconstruction.Value.Type as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
         state.Pairs.Add(new Pair(slots[0], slots[1]!, assignment.GetLocation(), successType), Outcome.Unknown);
@@ -321,11 +422,21 @@ internal sealed class ResultFlowAnalysis
     {
         var (yes, no) = Condition(statement.Condition, state);
         var result = new List<State>();
-        foreach (var path in yes) result.AddRange(Run(statement.Statement, path));
+        foreach (var path in yes)
+        {
+            result.AddRange(Run(statement.Statement, path));
+        }
+
         foreach (var path in no)
         {
-            if (statement.Else is null) result.Add(path);
-            else result.AddRange(Run(statement.Else.Statement, path));
+            if (statement.Else is null)
+            {
+                result.Add(path);
+            }
+            else
+            {
+                result.AddRange(Run(statement.Else.Statement, path));
+            }
         }
         return result;
     }
@@ -344,23 +455,39 @@ internal sealed class ResultFlowAnalysis
                 SymbolEqualityComparer.Default.Equals(_model.GetTypeInfo(declaration.Type).Type, _appError));
         foreach (var section in statement.Sections)
         {
-            if (section.Labels.Any(x => x is DefaultSwitchLabelSyntax)) hasDefault = true;
+            if (section.Labels.Any(x => x is DefaultSwitchLabelSyntax))
+            {
+                hasDefault = true;
+            }
+
             var path = state.Copy();
             if (errorPair is not null)
             {
                 var sectionHasNull = section.Labels.OfType<CaseSwitchLabelSyntax>()
                     .Any(label => label.Value.IsKind(SyntaxKind.NullLiteralExpression));
                 if (section.Labels.Count == 1 && sectionHasNull)
+                {
                     path.Pairs[errorPair] = Outcome.Success;
+                }
                 else if (section.Labels.Count == 1 && section.Labels[0] is DefaultSwitchLabelSyntax &&
                          hasNonNullCase && !hasNullCase)
+                {
                     path.Pairs[errorPair] = Outcome.Success;
+                }
                 else if (!sectionHasNull &&
                          (section.Labels.All(label => label is not DefaultSwitchLabelSyntax) || hasNullCase))
+                {
                     path.Pairs[errorPair] = Outcome.Failure;
+                }
             }
             foreach (var label in section.Labels.OfType<CasePatternSwitchLabelSyntax>())
-                if (label.WhenClause is not null) Read(label.WhenClause.Condition, path);
+            {
+                if (label.WhenClause is not null)
+                {
+                    Read(label.WhenClause.Condition, path);
+                }
+            }
+
             var exits = RunStatements(section.Statements, One(path));
             foreach (var exit in exits)
             {
@@ -368,7 +495,11 @@ internal sealed class ResultFlowAnalysis
                 result.Add(exit);
             }
         }
-        if (!hasDefault) result.Add(state);
+        if (!hasDefault)
+        {
+            result.Add(state);
+        }
+
         return result;
     }
 
@@ -385,7 +516,10 @@ internal sealed class ResultFlowAnalysis
     private (List<State> yes, List<State> no) Condition(ExpressionSyntax expression, State state)
     {
         if (expression is ParenthesizedExpressionSyntax parenthesized)
+        {
             return Condition(parenthesized.Expression, state);
+        }
+
         if (expression is PrefixUnaryExpressionSyntax unary && unary.IsKind(SyntaxKind.LogicalNotExpression))
         {
             var (yes, no) = Condition(unary.Operand, state);
@@ -427,7 +561,11 @@ internal sealed class ResultFlowAnalysis
             var subject = Symbol(conditionalAccess?.Expression ?? typeTest.Left);
             foreach (var pair in state.Pairs.Keys)
             {
-                if (!SymbolEqualityComparer.Default.Equals(pair.Error, subject)) continue;
+                if (!SymbolEqualityComparer.Default.Equals(pair.Error, subject))
+                {
+                    continue;
+                }
+
                 yes.Pairs[pair] = Outcome.Failure;
                 no.Pairs[pair] = conditionalAccess is null ? Outcome.Success : Outcome.Unknown;
             }
@@ -441,7 +579,11 @@ internal sealed class ResultFlowAnalysis
         {
             foreach (var pair in state.Pairs.Keys)
             {
-                if (!SymbolEqualityComparer.Default.Equals(pair.Error, symbol)) continue;
+                if (!SymbolEqualityComparer.Default.Equals(pair.Error, symbol))
+                {
+                    continue;
+                }
+
                 trueState.Pairs[pair] = trueWhenNull ? Outcome.Success : Outcome.Failure;
                 falseState.Pairs[pair] = trueWhenNull ? Outcome.Failure : Outcome.Success;
             }
@@ -453,7 +595,11 @@ internal sealed class ResultFlowAnalysis
                 : Symbol(patterned.Expression);
             var pattern = patterned.Pattern;
             var negated = pattern is UnaryPatternSyntax unaryPattern;
-            if (pattern is UnaryPatternSyntax notPattern) pattern = notPattern.Pattern;
+            if (pattern is UnaryPatternSyntax notPattern)
+            {
+                pattern = notPattern.Pattern;
+            }
+
             var knownNonNull = pattern is DeclarationPatternSyntax or TypePatternSyntax ||
                 pattern is RecursivePatternSyntax ||
                 patterned.Expression is ConditionalAccessExpressionSyntax && pattern is ConstantPatternSyntax;
@@ -461,7 +607,11 @@ internal sealed class ResultFlowAnalysis
             {
                 foreach (var pair in state.Pairs.Keys)
                 {
-                    if (!SymbolEqualityComparer.Default.Equals(pair.Error, subject)) continue;
+                    if (!SymbolEqualityComparer.Default.Equals(pair.Error, subject))
+                    {
+                        continue;
+                    }
+
                     var falseMeansNull = pattern is DeclarationPatternSyntax or TypePatternSyntax ||
                         pattern is RecursivePatternSyntax recursive && recursive.PropertyPatternClause is null;
                     var opposite = falseMeansNull ? Outcome.Success : Outcome.Unknown;
@@ -476,8 +626,12 @@ internal sealed class ResultFlowAnalysis
         {
             var subject = Symbol(access.Expression);
             foreach (var pair in state.Pairs.Keys)
+            {
                 if (SymbolEqualityComparer.Default.Equals(pair.Error, subject))
+                {
                     trueState.Pairs[pair] = Outcome.Failure;
+                }
+            }
         }
         return (One(trueState), One(falseState));
     }
@@ -498,8 +652,16 @@ internal sealed class ResultFlowAnalysis
         if (expression is BinaryExpressionSyntax binary &&
             (binary.IsKind(SyntaxKind.EqualsExpression) || binary.IsKind(SyntaxKind.NotEqualsExpression)))
         {
-            var candidate = binary.Left.IsKind(SyntaxKind.NullLiteralExpression) ? binary.Right :
-                binary.Right.IsKind(SyntaxKind.NullLiteralExpression) ? binary.Left : null;
+            ExpressionSyntax? candidate = null;
+            if (binary.Left.IsKind(SyntaxKind.NullLiteralExpression))
+            {
+                candidate = binary.Right;
+            }
+            else if (binary.Right.IsKind(SyntaxKind.NullLiteralExpression))
+            {
+                candidate = binary.Left;
+            }
+
             if (candidate is not null)
             {
                 symbol = Symbol(candidate);
@@ -518,18 +680,29 @@ internal sealed class ResultFlowAnalysis
                 IsInsideNestedFunction(invocation, expression) ||
                 invocation.Ancestors().OfType<AwaitExpressionSyntax>().Any() ||
                 IsTaskWrapper(expression))
+            {
                 continue;
+            }
+
             if (IsResultOrTask(_model.GetTypeInfo(invocation).Type))
+            {
                 Report(ResultSafetyAnalyzer.IgnoredResult, invocation.GetLocation());
+            }
         }
-        if (state.Pairs.Count == 0) return;
+        if (state.Pairs.Count == 0)
+        {
+            return;
+        }
+
         foreach (var member in expression.DescendantNodesAndSelf().OfType<MemberAccessExpressionSyntax>())
         {
             var receiver = Symbol(member.Expression);
             if (receiver is not null && state.Pairs.Any(entry =>
                 SymbolEqualityComparer.Default.Equals(entry.Key.Error, receiver) &&
                 entry.Value is Outcome.Unknown or Outcome.Success))
+            {
                 Report(ResultSafetyAnalyzer.UnsafeFlow, member.GetLocation());
+            }
         }
         foreach (var assignment in expression.DescendantNodesAndSelf().OfType<AssignmentExpressionSyntax>())
         {
@@ -537,7 +710,9 @@ internal sealed class ResultFlowAnalysis
             if (target is not null && state.Pairs.Keys.Any(pair =>
                 SymbolEqualityComparer.Default.Equals(pair.Error, target) ||
                 SymbolEqualityComparer.Default.Equals(pair.Value, target)))
+            {
                 Report(ResultSafetyAnalyzer.UnsafeFlow, assignment.GetLocation());
+            }
         }
         foreach (var argument in expression.DescendantNodesAndSelf().OfType<ArgumentSyntax>())
         {
@@ -548,16 +723,25 @@ internal sealed class ResultFlowAnalysis
                 if (target is not null && state.Pairs.Keys.Any(pair =>
                     SymbolEqualityComparer.Default.Equals(pair.Value, target) ||
                     SymbolEqualityComparer.Default.Equals(pair.Error, target)))
+                {
                     Report(ResultSafetyAnalyzer.UnsafeFlow, argument.GetLocation());
+                }
             }
         }
         foreach (var identifier in expression.DescendantNodesAndSelf().OfType<IdentifierNameSyntax>())
         {
             if (identifier.Ancestors().OfType<InvocationExpressionSyntax>().Any(i =>
                 i.Expression is IdentifierNameSyntax name && name.Identifier.ValueText == "nameof"))
+            {
                 continue;
+            }
+
             var symbol = Symbol(identifier);
-            if (symbol is null) continue;
+            if (symbol is null)
+            {
+                continue;
+            }
+
             foreach (var entry in state.Pairs)
             {
                 if (entry.Key.Value is not null &&
@@ -574,16 +758,28 @@ internal sealed class ResultFlowAnalysis
     private static bool IsInsideNestedFunction(SyntaxNode node, SyntaxNode root)
     {
         if (root is LambdaExpressionSyntax or LocalFunctionStatementSyntax or AnonymousMethodExpressionSyntax)
+        {
             return true;
+        }
+
         for (var parent = node.Parent; parent is not null && parent != root; parent = parent.Parent)
+        {
             if (parent is LambdaExpressionSyntax or LocalFunctionStatementSyntax or AnonymousMethodExpressionSyntax)
+            {
                 return true;
+            }
+        }
+
         return false;
     }
 
     private bool IsTaskWrapper(SyntaxNode root)
     {
-        if (root is not InvocationExpressionSyntax invocation) return false;
+        if (root is not InvocationExpressionSyntax invocation)
+        {
+            return false;
+        }
+
         var method = _model.GetSymbolInfo(invocation).Symbol as IMethodSymbol;
         return method is not null && method.Name == "FromResult" &&
             method.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks" &&
@@ -594,56 +790,94 @@ internal sealed class ResultFlowAnalysis
     private void CheckReturn(State state, ReturnStatementSyntax returned, ExpressionSyntax? expression)
     {
         foreach (var pending in state.Pending.Values.Distinct())
+        {
             Report(ResultSafetyAnalyzer.IgnoredResult, pending);
+        }
+
         foreach (var entry in state.Pairs)
         {
             if (entry.Value == Outcome.Unknown && !_unsafePairs.Contains(entry.Key))
+            {
                 Report(ResultSafetyAnalyzer.IgnoredResult, entry.Key.Location);
+            }
             else if (entry.Value == Outcome.Failure && !PropagatesFailure(expression, entry.Key.Error) &&
                      !_unsafePairs.Contains(entry.Key))
+            {
                 Report(ResultSafetyAnalyzer.UnsafeFlow, returned.GetLocation());
+            }
         }
     }
 
     private bool PropagatesFailure(ExpressionSyntax? expression, ISymbol error)
     {
-        if (expression is null) return false;
-        if (SymbolEqualityComparer.Default.Equals(Symbol(expression), error)) return true;
+        if (expression is null)
+        {
+            return false;
+        }
+
+        if (SymbolEqualityComparer.Default.Equals(Symbol(expression), error))
+        {
+            return true;
+        }
+
         var expressionType = _model.GetTypeInfo(expression).Type;
         if (SymbolEqualityComparer.Default.Equals(expressionType, _appError) &&
             expressionType?.NullableAnnotation != NullableAnnotation.Annotated)
+        {
             return true;
+        }
+
         if (expression is InvocationExpressionSyntax invocation &&
             _model.GetTypeInfo(invocation).Type is INamedTypeSymbol type &&
             SymbolEqualityComparer.Default.Equals(type, _appError))
+        {
             return true;
+        }
+
         if (expression is SwitchExpressionSyntax switched &&
             switched.Arms.Any(arm => arm.Pattern is DiscardPatternSyntax) &&
             switched.Arms.All(arm => PropagatesFailure(arm.Expression, error)))
+        {
             return true;
+        }
+
         return false;
     }
 
     private void ReportUnfinished(State state, Location location)
     {
         foreach (var pending in state.Pending.Values.Distinct())
+        {
             Report(ResultSafetyAnalyzer.IgnoredResult, pending);
+        }
+
         foreach (var entry in state.Pairs)
         {
             if (entry.Value == Outcome.Unknown && !_unsafePairs.Contains(entry.Key))
+            {
                 Report(ResultSafetyAnalyzer.IgnoredResult, entry.Key.Location);
+            }
             else if (entry.Value == Outcome.Failure && !_unsafePairs.Contains(entry.Key))
+            {
                 Report(ResultSafetyAnalyzer.UnsafeFlow, location);
+            }
         }
     }
 
     private void ReportUnobservedAtThrow(State state)
     {
         foreach (var pending in state.Pending.Values.Distinct())
+        {
             Report(ResultSafetyAnalyzer.IgnoredResult, pending);
+        }
+
         foreach (var entry in state.Pairs)
+        {
             if (entry.Value == Outcome.Unknown && !_unsafePairs.Contains(entry.Key))
+            {
                 Report(ResultSafetyAnalyzer.IgnoredResult, entry.Key.Location);
+            }
+        }
     }
 
     private bool ContainsResultWork(StatementSyntax statement) =>
@@ -657,11 +891,17 @@ internal sealed class ResultFlowAnalysis
         if (expression is PostfixUnaryExpressionSyntax postfix &&
             postfix.IsKind(SyntaxKind.SuppressNullableWarningExpression) &&
             IsDefaultLike(postfix.Operand))
+        {
             return true;
+        }
+
         var valueType = pair.SuccessType;
         if (valueType is null || !valueType.IsReferenceType ||
             valueType.NullableAnnotation == NullableAnnotation.Annotated)
+        {
             return false;
+        }
+
         return IsDefaultLike(expression);
     }
 
@@ -678,11 +918,18 @@ internal sealed class ResultFlowAnalysis
 
     private bool IsResultOrTask(ITypeSymbol? type)
     {
-        if (IsResult(type)) return true;
+        if (IsResult(type))
+        {
+            return true;
+        }
+
         if (type is INamedTypeSymbol named && named.TypeArguments.Length == 1 &&
             named.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks" &&
             (named.Name == "Task" || named.Name == "ValueTask"))
+        {
             return IsResult(named.TypeArguments[0]);
+        }
+
         return false;
     }
 
@@ -702,9 +949,15 @@ internal sealed class ResultFlowAnalysis
 
     private static void ClearPending(State state, ISymbol source)
     {
-        if (!state.Pending.TryGetValue(source, out var obligation)) return;
+        if (!state.Pending.TryGetValue(source, out var obligation))
+        {
+            return;
+        }
+
         foreach (var symbol in state.Pending.Where(x => ReferenceEquals(x.Value, obligation)).Select(x => x.Key).ToArray())
+        {
             state.Pending.Remove(symbol);
+        }
     }
 
     private static List<State> One(State state) => new() { state };
@@ -714,7 +967,11 @@ internal sealed class ResultFlowAnalysis
         var merged = new List<State>();
         foreach (var state in states)
         {
-            if (merged.Any(existing => SameState(existing, state))) continue;
+            if (merged.Any(existing => SameState(existing, state)))
+            {
+                continue;
+            }
+
             merged.Add(state);
         }
         return merged;
@@ -723,14 +980,28 @@ internal sealed class ResultFlowAnalysis
     private static bool SameState(State left, State right)
     {
         if (left.Break != right.Break || left.Pairs.Count != right.Pairs.Count ||
-            left.Pending.Count != right.Pending.Count) return false;
+            left.Pending.Count != right.Pending.Count)
+        {
+            return false;
+        }
+
         foreach (var entry in left.Pairs)
+        {
             if (!right.Pairs.TryGetValue(entry.Key, out var outcome) || outcome != entry.Value)
+            {
                 return false;
+            }
+        }
+
         foreach (var entry in left.Pending)
+        {
             if (!right.Pending.TryGetValue(entry.Key, out var location) ||
                 !ReferenceEquals(location, entry.Value))
+            {
                 return false;
+            }
+        }
+
         return true;
     }
 
@@ -738,6 +1009,8 @@ internal sealed class ResultFlowAnalysis
     {
         var key = descriptor.Id + ":" + location.SourceSpan.Start + ":" + location.SourceSpan.Length;
         if (_reported.Add(key))
+        {
             _context.ReportDiagnostic(Diagnostic.Create(descriptor, location, args));
+        }
     }
 }

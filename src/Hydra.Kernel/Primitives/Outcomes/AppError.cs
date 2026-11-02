@@ -79,7 +79,9 @@ public sealed class AppError
             foreach (var field in fieldErrors)
             {
                 if (field is null)
+                {
                     throw new ArgumentException("Field errors cannot contain null.", nameof(fieldErrors));
+                }
 
                 fields.Add(field);
             }
@@ -87,7 +89,7 @@ public sealed class AppError
             FieldErrors = fields.AsReadOnly();
         }
     }
-    
+
     /// <summary>
     /// Creates a new AppError instance with the Validation category and the specified code and parameters.
     /// </summary>
@@ -96,7 +98,7 @@ public sealed class AppError
     /// <returns>A new AppError instance.</returns>
     public static AppError Validation(Enum code, params object?[] parameters)
         => new(AppErrorCategory.Validation, code, parameters);
-    
+
     /// <summary>
     /// Creates a new AppError instance with the Validation category and the specified code and field errors.
     /// </summary>
@@ -112,7 +114,7 @@ public sealed class AppError
         ArgumentNullException.ThrowIfNull(fieldErrors);
         return new(AppErrorCategory.Validation, code, parameters, fieldErrors);
     }
-    
+
     /// <summary>
     /// Creates a new AppError instance with the NotFound category and the specified code and parameters.
     /// </summary>
@@ -121,7 +123,7 @@ public sealed class AppError
     /// <returns></returns>
     public static AppError NotFound(Enum code, params object?[] parameters)
         => new(AppErrorCategory.NotFound, code, parameters);
-    
+
     /// <summary>
     /// Creates a new AppError instance with the Conflict category and the specified code and parameters.
     /// </summary>

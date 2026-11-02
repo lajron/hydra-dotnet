@@ -1,5 +1,4 @@
 using Hydra.Kernel.Primitives;
-using Xunit;
 
 namespace Hydra.Kernel.Tests.Primitives.Outcomes;
 

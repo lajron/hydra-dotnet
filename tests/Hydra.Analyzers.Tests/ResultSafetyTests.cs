@@ -3,7 +3,6 @@ using Hydra.Kernel.Primitives;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Xunit;
 
 namespace Hydra.Analyzers.Tests;
 
@@ -173,8 +172,14 @@ public sealed class ResultSafetyTests
     {
         var source = Prefix.Replace("Result<Guest> Execute()", "async Task<Result<Guest>> Execute()") + body + Suffix;
         var diagnostics = await Analyze(source);
-        if (expectedId.Length == 0) Assert.Empty(diagnostics);
-        else Assert.Contains(diagnostics, d => d.Id == expectedId);
+        if (expectedId.Length == 0)
+        {
+            Assert.Empty(diagnostics);
+        }
+        else
+        {
+            Assert.Contains(diagnostics, d => d.Id == expectedId);
+        }
     }
 
     [Fact]

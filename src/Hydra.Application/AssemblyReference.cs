@@ -1,5 +1,3 @@
-using System.Reflection;
-
 namespace Hydra.Application;
 
 /// <summary>Identifies the application assembly for compile-time service discovery.</summary>

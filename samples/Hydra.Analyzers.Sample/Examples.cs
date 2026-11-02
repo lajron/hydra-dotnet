@@ -1,5 +1,3 @@
-using Hydra.Kernel.Primitives;
-
 namespace Hydra.Analyzers.Sample;
 
 public enum GuestErrors { NotFound, AlreadyRegistered }
@@ -18,7 +16,10 @@ public sealed class Examples
     {
         var (guest, error) = GetGuest(exists);
         if (error is not null)
+        {
             return error;
+        }
+
         return Result.Success(guest);
     }
 
@@ -44,7 +45,10 @@ public sealed class Examples
         if (error is not null)
         {
             if (error.Code is not GuestErrors.NotFound)
+            {
                 return error;
+            }
+
             guest = new Guest { Name = "Fallback" };
         }
         return Result.Success(guest);

@@ -1,7 +1,6 @@
 <Solution>
   <Project Path="src/Hydra.Analyzers/Hydra.Analyzers.csproj" />
   <Project Path="src/Hydra.Application/Hydra.Application.csproj" />
-  <Project Path="src/Hydra.Integrations/Hydra.Integrations.csproj" />
   <Project Path="src/Hydra.Kernel/Hydra.Kernel.csproj" />
   <Project Path="src/Hydra.WebApi/Hydra.WebApi.csproj" />
   <Project Path="tests/Hydra.Analyzers.Tests/Hydra.Analyzers.Tests.csproj" />

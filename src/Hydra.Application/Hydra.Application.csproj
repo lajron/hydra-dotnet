@@ -7,18 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Domain\" />
-      <Folder Include="Features\" />
-      <Folder Include="Operations\" />
-      <Folder Include="Persistence\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="Mediator.Abstractions" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Hydra.Integrations\Hydra.Integrations.csproj" />
       <ProjectReference Include="..\Hydra.Kernel\Hydra.Kernel.csproj" />
     </ItemGroup>
 

@@ -43,7 +43,7 @@ public sealed class Result<T>
 {
     private T Value { get; }
     private AppError? Error { get; }
-    
+
     private Result(T value)
     {
         Value = value;
@@ -55,7 +55,7 @@ public sealed class Result<T>
         Value = default!;
         Error = error;
     }
-    
+
     internal static Result<T> CreateSuccess(T value) => new(value);
 
     public static implicit operator Result<T>(AppError error)
@@ -63,10 +63,10 @@ public sealed class Result<T>
         ArgumentNullException.ThrowIfNull(error);
         return new Result<T>(error);
     }
-    
+
     public void Deconstruct(out T value, out AppError? error)
     {
         value = Value;
         error = Error;
-    }   
+    }
 }

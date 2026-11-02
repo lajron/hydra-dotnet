@@ -1,13 +1,11 @@
 using FluentValidation;
-using Hydra.Kernel.Validation;
 using Mediator;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Hydra.WebApi.Configuration;
 
 public static class MediatorConfiguration
 {
-    public static IServiceCollection AddMediatorConfiguration(this IServiceCollection services)
+    public static IServiceCollection AddMediatorServices(this IServiceCollection services)
     {
         services.AddMediator((MediatorOptions options) =>
         {

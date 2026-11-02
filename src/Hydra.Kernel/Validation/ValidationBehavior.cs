@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using FluentValidation;
 using FluentValidation.Results;
-using Hydra.Kernel.Primitives;
 using Mediator;
 
 namespace Hydra.Kernel.Validation;
@@ -31,10 +30,14 @@ public sealed class ValidationBehavior<TMessage, TResponse>(IEnumerable<IValidat
         }
 
         if (failures.Count == 0)
+        {
             return await next(message, cancellationToken);
+        }
 
         if (!FailureResponse<TResponse>.CanReturnFailure)
+        {
             throw new ValidationException(failures);
+        }
 
         var fieldErrors = failures.Select(failure => FieldValidationError.Create(
             failure.PropertyName,

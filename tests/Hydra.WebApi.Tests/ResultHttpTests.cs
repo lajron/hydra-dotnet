@@ -41,9 +41,13 @@ public sealed class ResultHttpTests
         Assert.Equal("application/problem+json", Assert.Single(response.ContentTypes));
         Assert.False(problem.Extensions.ContainsKey("code"));
         if (category == AppErrorCategory.Validation)
+        {
             Assert.IsType<ValidationProblemDetails>(problem);
+        }
         else
+        {
             Assert.IsType<ProblemDetails>(problem);
+        }
     }
 
     [Fact]
@@ -101,7 +105,7 @@ public sealed class ResultHttpTests
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseUrls("http://127.0.0.1:0");
         builder.Services.AddControllers();
-        builder.Services.AddLocalizationConfiguration();
+        builder.Services.AddLocalizationServices();
         await using var app = builder.Build();
         app.UseRequestLocalization();
         app.MapGet("/error", async context =>
@@ -189,8 +193,8 @@ public sealed class ResultHttpTests
 
     private sealed class CultureScope : IDisposable
     {
-        private readonly CultureInfo previous = CultureInfo.CurrentCulture;
-        private readonly CultureInfo previousUi = CultureInfo.CurrentUICulture;
+        private readonly CultureInfo _previous = CultureInfo.CurrentCulture;
+        private readonly CultureInfo _previousUi = CultureInfo.CurrentUICulture;
 
         public CultureScope(string culture)
         {
@@ -200,8 +204,8 @@ public sealed class ResultHttpTests
 
         public void Dispose()
         {
-            CultureInfo.CurrentCulture = previous;
-            CultureInfo.CurrentUICulture = previousUi;
+            CultureInfo.CurrentCulture = _previous;
+            CultureInfo.CurrentUICulture = _previousUi;
         }
     }
 }

@@ -1,9 +1,5 @@
 using System.Collections.Immutable;
 using System.Linq;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Hydra.Analyzers;
 
@@ -43,7 +39,9 @@ public sealed class ResultSafetyAnalyzer : DiagnosticAnalyzer
             if (result is null || genericResult is null ||
                 result.ContainingAssembly.Name != "Hydra.Kernel" ||
                 genericResult.ContainingAssembly.Name != "Hydra.Kernel")
+            {
                 return;
+            }
 
             start.RegisterSyntaxNodeAction(c => Analyze(c, result, genericResult), SyntaxKind.MethodDeclaration);
             start.RegisterSyntaxNodeAction(c => AnalyzeOtherBody(c, result, genericResult),
@@ -82,13 +80,27 @@ public sealed class ResultSafetyAnalyzer : DiagnosticAnalyzer
             ParenthesizedLambdaExpressionSyntax lambda => lambda.Body as ExpressionSyntax,
             _ => null,
         };
-        if (expression is null) return;
+        if (expression is null)
+        {
+            return;
+        }
+
         var converted = context.SemanticModel.GetTypeInfo(context.Node).ConvertedType as INamedTypeSymbol;
-        if (converted?.DelegateInvokeMethod?.ReturnsVoid != true) return;
+        if (converted?.DelegateInvokeMethod?.ReturnsVoid != true)
+        {
+            return;
+        }
+
         var type = context.SemanticModel.GetTypeInfo(expression).Type;
-        if (type is null) return;
+        if (type is null)
+        {
+            return;
+        }
+
         if (IsResultType(type, result, genericResult))
+        {
             context.ReportDiagnostic(Diagnostic.Create(IgnoredResult, expression.GetLocation()));
+        }
     }
 
     private static void Analyze(SyntaxNodeAnalysisContext context, INamedTypeSymbol result, INamedTypeSymbol genericResult)
@@ -104,7 +116,9 @@ public sealed class ResultSafetyAnalyzer : DiagnosticAnalyzer
                 if (IsResultOrTaskType(type, result, genericResult) &&
                     !SymbolEqualityComparer.Default.Equals(type, returned) &&
                     !IsResultType(returned, result, genericResult))
+                {
                     context.ReportDiagnostic(Diagnostic.Create(IgnoredResult, expression.GetLocation()));
+                }
             }
             return;
         }
@@ -132,7 +146,11 @@ public sealed class ResultSafetyAnalyzer : DiagnosticAnalyzer
                 break;
             case CompilationUnitSyntax unit:
                 var statements = unit.Members.OfType<GlobalStatementSyntax>().Select(x => x.Statement).ToArray();
-                if (statements.Length > 0) flow.Analyze(statements);
+                if (statements.Length > 0)
+                {
+                    flow.Analyze(statements);
+                }
+
                 break;
         }
 
@@ -151,7 +169,9 @@ public sealed class ResultSafetyAnalyzer : DiagnosticAnalyzer
             if (IsResultOrTaskType(type, result, genericResult) &&
                 !SymbolEqualityComparer.Default.Equals(type, returned) &&
                 !IsResultType(returned, result, genericResult))
+            {
                 context.ReportDiagnostic(Diagnostic.Create(IgnoredResult, arrow.Expression.GetLocation()));
+            }
         }
     }
 
@@ -178,9 +198,13 @@ public sealed class ResultSafetyAnalyzer : DiagnosticAnalyzer
             _ => Enumerable.Empty<ExpressionSyntax>(),
         };
         foreach (var initializer in initializers)
+        {
             if (IsResultOrTaskType(context.SemanticModel.GetTypeInfo(initializer).Type, result, genericResult) &&
                 !IsKnownSuccess(initializer, context.SemanticModel, result))
+            {
                 context.ReportDiagnostic(Diagnostic.Create(UnsafeFlow, initializer.GetLocation()));
+            }
+        }
     }
 
     private static bool IsKnownSuccess(ExpressionSyntax expression, SemanticModel model, INamedTypeSymbol result) =>
