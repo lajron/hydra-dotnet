@@ -155,6 +155,9 @@ dotnet_naming_rule.types_pascal.severity = warning
 # ---------------------------------------------------------------------------
 dotnet_diagnostic.CA2016.severity = warning
 dotnet_diagnostic.CA1068.severity = warning
+# Ignored results of known-pure calls (string ops, LINQ, Try*, unused `new`, [Pure]). Not enforced by default.
+# IDE0058 is deliberately not enabled: it would force `_ =` on builders and DI registrations.
+dotnet_diagnostic.CA1806.severity = warning
 # ASP.NET Core has no synchronization context; ConfigureAwait(false) would be noise.
 dotnet_diagnostic.CA2007.severity = none
 # Aggressive collection-expression / simplification rules: editor hints only.
