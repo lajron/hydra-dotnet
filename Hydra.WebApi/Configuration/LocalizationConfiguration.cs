@@ -2,7 +2,7 @@ namespace Hydra.WebApi.Configuration;
 
 public static class LocalizationConfiguration
 {
-    public static IServiceCollection AddHydraLocalization(this IServiceCollection services)
+    public static IServiceCollection AddLocalizationConfiguration(this IServiceCollection services)
     {
         services.AddLocalization();
         services.Configure<RequestLocalizationOptions>(options =>

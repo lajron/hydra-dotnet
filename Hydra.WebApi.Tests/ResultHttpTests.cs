@@ -101,7 +101,7 @@ public sealed class ResultHttpTests
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseUrls("http://127.0.0.1:0");
         builder.Services.AddControllers();
-        builder.Services.AddHydraLocalization();
+        builder.Services.AddLocalizationConfiguration();
         await using var app = builder.Build();
         app.UseRequestLocalization();
         app.MapGet("/error", async context =>
