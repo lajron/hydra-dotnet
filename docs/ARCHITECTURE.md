@@ -20,7 +20,7 @@ capabilities directly. These dependencies are part of Hydra's design.
 
 | Project | Responsibility |
 | --- | --- |
-| Kernel | Reusable `Result`, `AppError`, `IAsyncOperation` contracts, and validation behavior. |
+| Kernel | Reusable `Result`, `AppError`, `IAsyncOperation` contracts, validation behavior, and Options registration. |
 | Domain | Business entities, relationships, invariants, calculations, policies, and state transitions. Business rules are not limited to database entities. |
 | Infrastructure | Reusable Operations, persistence, external integrations, and their configuration. |
 | Application | Features, Commands, Queries, Handlers, Validators, and application workflows. |
@@ -57,6 +57,23 @@ named interface as scoped, supports internal implementations, and rejects
 ambiguous or duplicate registrations. The generic Kernel contracts themselves
 are not registered as services. Keep this named-interface registration behavior
 when adding production Operations.
+
+### Configuration options
+
+Kernel's `AddOptionsFromAssembly(assembly)` scans only the supplied assembly for
+concrete, non-generic classes with a public parameterless constructor and a name
+ending in `Options`. It removes that suffix to find the configuration section:
+`EmailOptions` binds `Email`, and `ConnectionStringsOptions` binds
+`ConnectionStrings`. It registers each type through Microsoft's Options Pattern,
+enables DataAnnotations validation and validates the options when the host starts.
+Repeated scans do not add duplicate Options registrations. No marker interface,
+attribute, or section-name constant is required.
+
+Each consuming assembly opts in once from its DI composition. Infrastructure's
+`AddInfrastructureServices` scans the Infrastructure assembly before registering
+persistence and Operations. WebApi supplies `IConfiguration` through its normal
+ASP.NET Core configuration providers. Define Options classes alongside the
+capability that uses them and inject `IOptions<T>` where needed.
 
 ### Results and request boundaries
 

@@ -1,4 +1,8 @@
 global using System.Diagnostics.CodeAnalysis;
 global using System.Reflection;
 global using Hydra.Kernel.Operations;
+global using Hydra.Kernel.Configuration;
+global using Hydra.Infrastructure.Persistence;
+global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Options;

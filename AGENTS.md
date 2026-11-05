@@ -16,3 +16,11 @@ Not checked by the build:
 - No `ConfigureAwait(false)` in application code.
 - `Async` suffix on `Task`-returning methods, except Mediator handlers, endpoints and tests.
 - Result pattern: see `src/Hydra.Analyzers/README.md` (RES001-003 are build errors).
+
+Configuration and persistence conventions:
+
+- Inspect `GlobalUsings.cs`, the existing DI entry points, `appsettings.json`, and `docs/ARCHITECTURE.md` before adding configuration code. Put shared usings in the project's `GlobalUsings.cs` and keep related registration and options types together.
+- Kernel owns generic Options discovery. A consuming assembly opts in once with `AddOptionsFromAssembly(assembly)`; `EmailOptions` binds the `Email` section. Do not add per-class binding, section-name constants, or an `IConfiguration` parameter when this convention handles the setting.
+- Infrastructure owns EF Core provider setup; WebApi supplies configuration. Keep `InfrastructureConfiguration` a thin composition point. Add a visible, credential-free `appsettings.json` key when introducing a new setting.
+- Add validation only for an actual requirement. `ConnectionStringsOptions.PostgreSql` may be empty at startup; do not add `[Required]` or a custom validator. A non-nullable string initialized to `string.Empty` does not itself validate configuration. Test missing and blank values against the intended behavior.
+- Check C# naming for public properties and configuration keys (`PostgreSql`, not `PostgreSQL`). Verify EF tooling through WebApi's DI path before considering a design-time factory; do not add a second configuration path without a demonstrated need.

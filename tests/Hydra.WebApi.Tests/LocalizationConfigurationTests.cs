@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Options;
 
 namespace Hydra.WebApi.Tests;
 
