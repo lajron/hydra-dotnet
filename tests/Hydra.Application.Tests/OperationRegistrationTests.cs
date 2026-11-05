@@ -1,6 +1,6 @@
 using System.Reflection;
 using System.Reflection.Emit;
-using Hydra.Application.Infrastructure.Configuration;
+using Hydra.Infrastructure.Configuration;
 using Hydra.Kernel.Operations;
 using Hydra.Kernel.Primitives;
 using Microsoft.Extensions.DependencyInjection;

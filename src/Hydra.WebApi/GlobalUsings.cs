@@ -1,7 +1,7 @@
 global using System.Collections.Concurrent;
 global using System.Globalization;
 global using System.Resources;
-global using Hydra.Application.Infrastructure.Configuration;
+global using Hydra.Infrastructure.Configuration;
 global using Hydra.Kernel.Primitives;
 global using Hydra.Kernel.Validation;
 global using Hydra.WebApi.Configuration;

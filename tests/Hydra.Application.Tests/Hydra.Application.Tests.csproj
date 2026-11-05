@@ -14,6 +14,7 @@
     <PackageReference Include="Mediator.SourceGenerator" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <ProjectReference Include="..\..\src\Hydra.Application\Hydra.Application.csproj" />
+    <ProjectReference Include="..\..\src\Hydra.Infrastructure\Hydra.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Hydra.Kernel\Hydra.Kernel.csproj" />
   </ItemGroup>
 </Project>

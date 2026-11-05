@@ -1,4 +1,4 @@
-namespace Hydra.Application.Infrastructure.Configuration;
+namespace Hydra.Infrastructure.Configuration;
 
 public static class OperationConfiguration
 {
