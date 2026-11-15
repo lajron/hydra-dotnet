@@ -6,7 +6,7 @@ public sealed class InfrastructureConfigurationTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData(" ")]
-    public void Resolves_postgresql_context_without_a_connection_string(string? connectionString)
+    public void Rejects_missing_postgresql_connection_string(string? connectionString)
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -21,8 +21,7 @@ public sealed class InfrastructureConfigurationTests
         using var provider = services.BuildServiceProvider(validateScopes: true);
         using var scope = provider.CreateScope();
 
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        Assert.Equal("Npgsql.EntityFrameworkCore.PostgreSQL", context.Database.ProviderName);
+        Assert.Throws<OptionsValidationException>(() => scope.ServiceProvider.GetRequiredService<AppDbContext>());
     }
 
     [Fact]

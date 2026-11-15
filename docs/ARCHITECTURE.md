@@ -150,3 +150,21 @@ control, idempotency, transaction boundaries, and safe recovery explicitly.
 Favor cohesive, discoverable code and the fewest abstractions that serve the
 workflow. Preserve the existing Kernel, Result, validation, localization, DI,
 and analyzer behavior as features are added.
+
+## Local development
+
+Run PostgreSQL in Docker and WebApi locally. The development connection string
+matches the fixed Compose credentials; these public credentials are for local
+development only and must not be reused in production.
+
+```bash
+docker compose up -d
+docker compose ps                 # Check container health
+docker compose logs -f            # View PostgreSQL logs
+dotnet run --project src/Hydra.WebApi
+docker compose down               # Stop PostgreSQL; keep database data
+docker compose down -v            # Reset the development database volume
+```
+
+`docker compose down` preserves the database data. `docker compose down -v`
+deletes the development database volume and its data.

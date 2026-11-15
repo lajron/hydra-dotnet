@@ -13,5 +13,6 @@ public static class PersistenceConfiguration
 
 public sealed class ConnectionStringsOptions
 {
+    [Required]
     public string PostgreSql { get; set; } = string.Empty;
 }
