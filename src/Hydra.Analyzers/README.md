@@ -10,8 +10,10 @@
 | RES002 | A deconstructed value can be used while its Result might have failed. | Handle the matching error or assign a replacement first. |
 | RES003 | The Result state cannot be proven safe at this operation. | Propagate failure, recover, or simplify the flow. |
 | HYD001 | An expression-bodied member's expression spans several lines (a multi-line ternary or LINQ chain). | Use a block body, or keep the expression on one line. One expression that starts on the line after `=>` is accepted. |
+| HYD002 | A class implementing a Kernel Operation contract depends on another such Operation through a member, parameter, call, or creation. | Move orchestration to an Application Handler; use an ordinary helper for internal technical steps. |
 
-HYD001 is a coding-standard rule, not a Result rule; it is reported as a warning in `.editorconfig`. See `docs/CODING_STANDARDS.md`.
+HYD001 is a coding-standard rule, not a Result rule; it is reported as a warning in `.editorconfig`. See `ai-layer/CODING_STANDARDS.md`.
+HYD002 is an architecture error. It resolves Operation symbols through Kernel's generic contracts, without relying on file or namespace names. Integration components called Operations that do not implement those contracts cannot be identified reliably by this rule and remain subject to code review.
 
 The RES diagnostics are errors in `.editorconfig`. `_ = result` and `_ = await operation()` intentionally discard a Result. `_ = operation()` is rejected when `operation()` returns `Task<Result>` or `ValueTask<Result>` because it drops the task before awaiting it. Ordinary tasks remain the compiler's [CS4014](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/async-await-errors) concern.
 

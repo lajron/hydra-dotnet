@@ -9,3 +9,4 @@ RES001  | ResultSafety | Error | Ignored Result outcome
 RES002  | ResultSafety | Error | Unsafe Result value use
 RES003  | ResultSafety | Error | Unsafe failure flow
 HYD001  | Maintainability | Error | Multi-line expression body
+HYD002  | Architecture | Error | Operation dependency on another Operation

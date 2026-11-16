@@ -30,6 +30,7 @@ The repo builds with zero warnings. Style rules are warnings rather than errors 
 | IDE0051/52/59/60 | Unused members, values, parameters |
 | CA2016, CA1068 | Forward `CancellationToken`; token is the last parameter |
 | CA1806 | Do not ignore the result of string operations, LINQ, `Try*` calls, unused `new`, `[Pure]` methods |
+| HYD002 (Hydra.Analyzers) | An Operation implementing a Kernel Operation contract cannot depend on or call another such Operation (error) |
 
 Deliberately off: IDE0058 (would force `_ =` on builders and DI registrations), IDE0045/0046 (they push `if`/`else` into ternaries), IDE0130 (namespaces do not mirror every folder),
 IDE2000/2003 (blank lines are unconstrained, so `var (v, error) = Get();` directly above `if (error ...)` is fine), CA2007.
@@ -53,3 +54,14 @@ Auto-fix a rule with a scoped run and review the diff:
 - RCS1238 does not report a ternary inside another ternary's condition, or inside a lambda inside a ternary.
 - CA1806 does not flag an ignored `ImmutableList.Add(...)` result or `Convert.ToInt32(...)`.
 - IDE0005 is reported on build only because `GenerateDocumentationFile` is on.
+- HYD002 checks symbol-resolved Operation contracts; integration components called Operations without these contracts require review.
+
+## Authoring conventions
+
+- Prefer cohesion over one type per file. Keep short, tightly related types together, such as Options and their registration; split independent responsibilities or a file that becomes hard to navigate.
+- Use `public` only for a needed assembly boundary or entry contract. Keep concrete implementations and provider wire models `internal` where possible. A contract normally lives beside the capability it exposes, not in a global Interfaces folder. `internal` does not provide folder privacy.
+- A scoped `Common/` is appropriate for code genuinely shared within its parent business area or subsystem. Name the owner in the path and avoid generic global Helpers, Services, or Common dumping grounds. See [architecture](ARCHITECTURE.md) for placement decisions.
+- Name types and methods for the capability they provide. Avoid pass-through wrappers, speculative interfaces, empty folder trees, and DTOs that duplicate an existing appropriate contract. Keep Feature request, Handler, Validator, and response code together when cohesive.
+- Follow the existing IDE0290 primary-constructor diagnostic when a constructor only assigns fields. Use a block body for a member with meaningful logic; HYD001 catches multi-line expression bodies, but the one-line case still requires judgment.
+- Do not use `ConfigureAwait(false)` in application code. Give `Task`-returning methods an `Async` suffix except Mediator handlers, endpoints, and tests. Forward cancellation tokens to asynchronous dependencies.
+- AI-generated changes must use the actual project API and naming, read the owning package and its tests before extending it, and run the documented build and test checks. Do not manufacture abstractions to match an illustrative tree.

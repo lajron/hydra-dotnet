@@ -1,6 +1,6 @@
 root = true
 
-# Tiers (see docs/CODING_STANDARDS.md):
+# Tiers (see ai-layer/CODING_STANDARDS.md):
 #   error      -> always fails `dotnet build`: Result safety (RES*), nullable, compiler correctness (CS9107/9113/9124)
 #   warning    -> every style rule. Printed by `dotnet build`; fails `dotnet build -warnaserror` (the strict gate).
 #                 Warnings, not errors, so existing code can be migrated incrementally and stays visible.
@@ -33,6 +33,7 @@ charset = utf-8
 dotnet_diagnostic.RES001.severity = error
 dotnet_diagnostic.RES002.severity = error
 dotnet_diagnostic.RES003.severity = error
+dotnet_diagnostic.HYD002.severity = error
 
 # ---------------------------------------------------------------------------
 # Style: ternaries, expression bodies, primary constructors
